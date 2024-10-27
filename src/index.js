@@ -1,11 +1,14 @@
+// src/index.js
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import App from './App';
-import { AuthProvider } from './context/AuthContext'; // Ensure correct import
+import { ToastContainer } from 'react-toastify'; // For toast notifications
+import 'react-toastify/dist/ReactToastify.css'; // Add toast styles
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+ReactDOM.render(
+    <React.StrictMode>
+        <App />
+        <ToastContainer /> {/* If using react-toastify */}
+    </React.StrictMode>,
+    document.getElementById('root')
 );

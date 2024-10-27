@@ -1,16 +1,15 @@
+// src/pages/Home.js
 import React from 'react';
-import { Container, Typography } from '@mui/material';
-import ProjectForm from '../components/ProjectForm';
 import ProjectList from '../components/ProjectList';
+import { Typography } from '@mui/material';
 
 const Home = () => {
-  return (
-    <Container>
-      <Typography variant="h4" gutterBottom>Project Management</Typography>
-      <ProjectForm />
-      <ProjectList />
-    </Container>
-  );
+    return (
+        <div>
+            <Typography variant="h4" sx={{ mb: 2 }}>Projects Dashboard</Typography>
+            <ProjectList />
+        </div>
+    );
 };
 
 export default Home;

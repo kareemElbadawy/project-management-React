@@ -1,85 +1,95 @@
 // src/components/ProjectList.js
-
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, CardActions, Button, CircularProgress } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
-import ApiService, { setAuthToken } from '../services/ApiService';
+import ApiService from '../services/ApiService';
+import { Box, Table, TableHead, TableBody, TableRow, TableCell, Button, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const ProjectList = () => {
     const [projects, setProjects] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProjects = async () => {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-            if (token) setAuthToken(token); // Set the auth token for requests
-
             try {
-                const data = await ApiService.fetchProjects(); // Call your API method to fetch projects
-                setProjects(data);
-            } catch (err) {
-                setError('Failed to fetch projects');
-            } finally {
-                setLoading(false);
+                const response = await ApiService.fetchProjects();
+                setProjects(response.data);
+            } catch (error) {
+                toast.error("Failed to load projects");
             }
         };
 
         fetchProjects();
     }, []);
 
-    // Handler for the "View" button
-    const handleViewClick = (projectId) => {
-        navigate(`/projects/${projectId}`); // Redirect to the project detail page
+    const handleViewTasks = async (projectId) => {
+        try {
+            const response = await ApiService.fetchTasks(projectId);
+            navigate('/tasks', { state: { tasks: response.data, projectId } });
+        } catch (error) {
+            toast.error("Failed to load tasks");
+        }
+    };
+
+    const handleEditProject = (project) => {
+        navigate('/project-form', { state: { project } }); // Navigate to ProjectForm with project data
+    };
+
+    const handleCreateProject = () => {
+        navigate('/project-form'); // Navigate to ProjectForm for creating a new project
     };
 
     return (
-        <Box sx={{ padding: 3 }}>
+        <Box sx={{ mt: 3 }}>
             <Typography variant="h4" gutterBottom>
                 Project List
             </Typography>
-            {loading ? (
-                <CircularProgress />
-            ) : error ? (
-                <Typography color="error">{error}</Typography>
-            ) : (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            <Button variant="contained" color="primary" onClick={handleCreateProject} sx={{ mb: 2 }}>
+                Create New Project
+            </Button>
+            <Table sx={{ minWidth: 650 }} aria-label="project list table">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Project Name</TableCell>
+                        <TableCell>Description</TableCell>
+                        <TableCell>Owner</TableCell>
+                        <TableCell>Budget</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Actions</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
                     {projects.map(project => (
-                        <Card key={project.projectId} sx={{ minWidth: 300 }}>
-                            <CardContent>
+                        <TableRow key={project.projectId}>
+                            <TableCell>
                                 <Typography variant="h6">{project.projectName}</Typography>
+                            </TableCell>
+                            <TableCell>
                                 <Typography variant="body2">{project.description}</Typography>
-                                <Typography variant="body2">Budget: ${project.budget.toFixed(2)}</Typography>
-                                <Typography variant="body2">Owner: {project.owner}</Typography>
+                            </TableCell>
+                            <TableCell>
+                                <Typography variant="body2">{project.owner}</Typography>
+                            </TableCell>
+                            <TableCell>
+                                <Typography variant="body2">${project.budget.toFixed(2)}</Typography>
+                            </TableCell>
+                            <TableCell>
                                 <Typography variant="body2">
-                                    Status: {project.status === 0 ? 'Active' : 'Inactive'}
+                                    {project.status === 0 ? 'Not Started' : project.status === 1 ? 'In Progress' : 'Completed'}
                                 </Typography>
-                                <Typography variant="body2">
-                                    Start Date: {new Date(project.startDate).toLocaleDateString()}
-                                </Typography>
-                                <Typography variant="body2">
-                                    End Date: {new Date(project.endDate).toLocaleDateString()}
-                                </Typography>
-                            </CardContent>
-                            <CardActions>
-                                <Button 
-                                    size="small" 
-                                    variant="contained" 
-                                    color="primary" 
-                                    onClick={() => handleViewClick(project.projectId)} // Attach click handler
-                                >
-                                    View
-                                </Button>
-                                <Button size="small" variant="outlined">
+                            </TableCell>
+                            <TableCell>
+                                <Button variant="outlined" onClick={() => handleEditProject(project)}>
                                     Edit
                                 </Button>
-                            </CardActions>
-                        </Card>
+                                <Button variant="outlined" onClick={() => handleViewTasks(project.projectId)} sx={{ ml: 1 }}>
+                                    View Tasks
+                                </Button>
+                            </TableCell>
+                        </TableRow>
                     ))}
-                </Box>
-            )}
+                </TableBody>
+            </Table>
         </Box>
     );
 };

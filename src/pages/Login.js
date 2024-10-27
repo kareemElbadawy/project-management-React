@@ -1,16 +1,14 @@
 // src/pages/Login.js
-
 import React, { useContext, useState } from 'react';
 import { TextField, Button, Box, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { AuthContext } from '../context/AuthContext';
-import ApiService, { setAuthToken } from '../services/ApiService';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const { login } = useContext(AuthContext);
     const [credentials, setCredentials] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -19,30 +17,17 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await login(credentials);
-            localStorage.setItem('token', response.token);
-            setAuthToken(response.token); // Set token for future requests
-            navigate('/'); // Redirect to home page after successful login
+            await login(credentials);
+            navigate('/'); // Redirect after successful login
         } catch (err) {
             setError('Login failed');
         }
     };
 
     return (
-        <Box 
-            component="form" 
-            onSubmit={handleSubmit} 
-            sx={{ 
-                maxWidth: 400, 
-                mx: 'auto', 
-                mt: 5, 
-                padding: 3, 
-                borderRadius: 2, 
-                boxShadow: 3 
-            }}
-        >
+        <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, mx: 'auto', mt: 5, padding: 3, borderRadius: 2, boxShadow: 3 }}>
             <Typography variant="h5" sx={{ textAlign: 'center', mb: 2 }}>Login</Typography>
-            {error && <Typography color="error" sx={{ textAlign: 'center' }}>{error}</Typography>}
+            {error && <Typography color="error">{error}</Typography>}
             <TextField
                 name="email"
                 label="Email"
